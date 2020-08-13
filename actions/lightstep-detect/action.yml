@@ -1,0 +1,13 @@
+name: 'Detect Lightstep Environment'
+description: 'test'
+
+outputs:
+  lightstep_config:
+    description: 'lightstep configuration settings'
+  lightstep_project:
+    description: 'lightstep projects'
+  lightstep_org:
+    description: 'lightstep organization'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

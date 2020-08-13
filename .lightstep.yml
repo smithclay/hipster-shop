@@ -1,0 +1,25 @@
+organization: -13a29ef7
+
+project: dev-clay
+
+services:
+  adservice:
+    path: ./src/adservice
+  cartservice:
+    path: ./src/cartservice
+  checkoutservice:
+    path: ./src/checkoutservice
+  currencyservice:
+    path: ./src/currencyservice
+  emailservice:
+    path: ./src/emailservice
+  frontend:
+    path: ./src/frontend
+  loadgenerator:
+    path: ./src/loadgenerator
+  paymentservice:
+    path: ./src/paymentservice
+  productcatalogservice:
+    path: ./src/productcatalogservice
+  shippingservice:
+    path: ./src/shippingservice

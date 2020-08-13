@@ -1,0 +1,63 @@
+name: Lightstep Snapshot Workflow
+on: [workflow_dispatch]
+
+env:
+  LIGHTSTEP_API_HOST: api-staging.lightstep.com
+  LIGHTSTEP_API_TOKEN: ${{ secrets.LIGHTSTEP_API_TOKEN }}
+
+jobs:
+  detect_lightstep_job:
+    runs-on: ubuntu-latest
+    name: Detect Lightstep Environment
+    outputs:
+      lightstep_project: ${{ steps.lightstep-detect.outputs.lightstep_project }}
+      lightstep_org: ${{ steps.lightstep-detect.outputs.lightstep_org }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Detect Lightstep Project
+        uses: ./actions/lightstep-detect
+        id: lightstep-detect
+        env:
+          LIGHTSTEP_API_HOST: 'api-staging.lightstep.com'
+          LIGHTSTEP_API_TOKEN: ${{ secrets.LIGHTSTEP_API_TOKEN }}
+      - name: Output Inferred Lightstep Project and Services
+        if: always()
+        run: |
+          echo "The Lightstep org is ${{ steps.lightstep-detect.outputs.lightstep_org }}"
+          echo "The Lightstep project is ${{ steps.lightstep-detect.outputs.lightstep_project }}"
+          echo "The Lightstep services are ${{ steps.lightstep-detect.outputs.lightstep_services }}"
+          echo "Config missing? ${{ env.LIGHTSTEP_CONFIG_MISSING }}"
+      - name: Create Lightstep Config
+        id: lightstep-config
+        if: ${{ env.LIGHTSTEP_CONFIG_MISSING }}
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "Create a `.lightstep.yml` file in this repository to track deploys, service health, metrics, and traces."
+          check_for_duplicate_msg: true
+  
+  take_snapshot_job:
+    needs: detect_lightstep_job
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && needs.detect_lightstep_job.outputs.lightstep_project
+    name: Take Lightstep Snapshot
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Call Snapshot API
+        uses: ./actions/lightstep-snapshot
+        id: lightstep-snapshot
+        env:
+          LIGHTSTEP_ORG: ${{ needs.detect_lightstep_job.outputs.lightstep_org }}
+          LIGHTSTEP_PROJECT: ${{ needs.detect_lightstep_job.outputs.lightstep_project }}
+          LIGHTSTEP_SERVICE: frontend # todo: support multiple services
+      - name: Add Snapshot Link to PR
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "View snapshot in Lightstep: https://app.staging.lightstep.com/dev-clay/explorer?snapshot_id=${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}"
+          check_for_duplicate_msg: true

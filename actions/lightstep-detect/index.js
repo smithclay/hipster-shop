@@ -26,7 +26,6 @@ async function run() {
 
         if (configExists()) {
             const config = loadConfig();
-            console.dir(config)
             const lightstepOrg = process.env.LIGHTSTEP_ORG || (config[0] && config[0].organization);
             if (!lightstepOrg) {
                 core.setFailed('Lightstep organization not found in config file or env variable.');

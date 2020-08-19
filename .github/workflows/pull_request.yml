@@ -1,37 +1,29 @@
 name: Lightstep PR Workflow
-on: [pull_request]
+on: 
+  pull_request:
+#   pull_request_review:
+#    types: [submitted]
 
 env:
   LIGHTSTEP_API_HOST: api-staging.lightstep.com
   LIGHTSTEP_API_TOKEN: ${{ secrets.LIGHTSTEP_API_TOKEN }}
+  ROLLBAR_API_TOKEN: ${{ secrets.ROLLBAR_API_TOKEN }}
 
 jobs:    
   deploy_check_job:
     runs-on: ubuntu-latest
-    name: Track Deploy in Lightstep
+    name: Lightstep Pre-Deploy Check
 
-# todo: change to PR approved
-#    if: github.event_name == 'pull_request' && needs.detect_lightstep_job.outputs.lightstep_project
     steps:  
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Detect Lightstep Project
-        uses: ./actions/lightstep-detect
-        id: lightstep-detect
-      - name: Output Inferred Lightstep Project and Services
-        if: always()
-        run: |
-          echo "The Lightstep org is ${{ steps.lightstep-detect.outputs.lightstep_org }}"
-          echo "The Lightstep project is ${{ steps.lightstep-detect.outputs.lightstep_project }}"
-          echo "The Lightstep services are ${{ steps.lightstep-detect.outputs.lightstep_services }}"
-          echo "Config missing? ${{ env.LIGHTSTEP_CONFIG_MISSING }}"
-      - name: Pre-Deploy Check
-        uses: ./actions/lightstep-conditions
-        id: lightstep-conditions 
+      - name: Lightstep Pre-Deploy Check
+        uses: ./actions/lightstep-predeploy
+        id: lightstep-predeploy
       - name: Add Comment
         uses: unsplash/comment-on-pr@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          msg: ${{ steps.lightstep-conditions.outputs.lightstep_conditions_md }}
+          msg: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_md }}
           check_for_duplicate_msg: true

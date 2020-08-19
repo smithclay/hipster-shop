@@ -1,5 +1,4 @@
 organization: -13a29ef7
-
 project: dev-clay
 
 services:
@@ -23,3 +22,9 @@ services:
     path: ./src/productcatalogservice
   shippingservice:
     path: ./src/shippingservice
+
+integrations:
+  rollbar:
+    environment: production
+    account: lightstep
+    project: Lightstep-Hipster-Shot

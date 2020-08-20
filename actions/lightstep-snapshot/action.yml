@@ -1,9 +1,27 @@
 name: 'Take Lightstep snapshot'
 description: 'Takes a snapshot of a service using the Lightstep API'
 
+inputs:
+  lightstep_organization:
+    description: 'The organization associated with your Lightstep account (usually your company name)'
+    required: false
+  
+  lightstep_project:
+    description: 'The Lightstep project associated with this repository'
+    required: false
+
+  lightstep_service:
+    description: 'The Lightstep service associated with this repository'
+    required: false
+
+  lightstep_api_key:
+    description: 'The key to access the Lightstep Public API'
+    required: false
+
 outputs:
   lightstep_snapshot_id:
-    description: 'id of Lightstep snapshot'
+    description: 'Lightstep Snapshot ID'
+
 runs:
   using: 'node12'
   main: 'dist/index.js'

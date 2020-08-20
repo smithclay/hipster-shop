@@ -6,8 +6,6 @@ on:
 
 env:
   LIGHTSTEP_API_HOST: api-staging.lightstep.com
-  LIGHTSTEP_API_TOKEN: ${{ secrets.LIGHTSTEP_API_TOKEN }}
-  ROLLBAR_API_TOKEN: ${{ secrets.ROLLBAR_API_TOKEN }}
 
 jobs:    
   deploy_check_job:
@@ -17,9 +15,32 @@ jobs:
     steps:  
       - name: Checkout
         uses: actions/checkout@v2
+      # checkout the private repo containing lightstep action
+      - name: Checkout GitHub Action Repo
+        uses: actions/checkout@v2
+        with:
+          repository: lightstep/lightstep-action-predeploy
+          ref: master
+          token: ${{ secrets.SMITHCLAY_PAT }}
+          path: .github/actions/lightstep-action-predeploy
       - name: Lightstep Pre-Deploy Check
-        uses: ./actions/lightstep-predeploy
         id: lightstep-predeploy
+        uses: ./.github/actions/lightstep-action-predeploy
+        with:
+          lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
+          pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
+          rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
+      - name: Echo Status
+        run: echo ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status }}
+      - name: Take Lightstep Snapshot
+        id: lightstep-snapshot
+        if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
+        with:
+          lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
+          lightstep_organization: ${{ steps.lightstep-predeploy.outputs.lightstep_organization }}
+          lightstep_project: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}
+          lightstep_service: 'frontend'
+        uses: ./actions/lightstep-snapshot
       - name: Add Comment
         uses: unsplash/comment-on-pr@master
         env:

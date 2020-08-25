@@ -1,4 +1,4 @@
-name: Lightstep PR Workflow
+name: Lightstep Pre-Deploy Check
 on: 
   pull_request:
 #   pull_request_review:
@@ -10,19 +10,29 @@ env:
 jobs:    
   deploy_check_job:
     runs-on: ubuntu-latest
-    name: Lightstep Pre-Deploy Check
+    name: Verify Pre-Deploy Status
 
     steps:  
       - name: Checkout
         uses: actions/checkout@v2
+
       # checkout the private repo containing lightstep action
-      - name: Checkout GitHub Action Repo
+      - name: Checkout Predeploy GitHub Action Repo
         uses: actions/checkout@v2
         with:
           repository: lightstep/lightstep-action-predeploy
           ref: master
           token: ${{ secrets.SMITHCLAY_PAT }}
           path: .github/actions/lightstep-action-predeploy
+
+      - name: Checkout Snapshot GitHub Action Repo
+        uses: actions/checkout@v2
+        with:
+          repository: lightstep/lightstep-action-snapshot
+          ref: master
+          token: ${{ secrets.SMITHCLAY_PAT }}
+          path: .github/actions/lightstep-action-snapshot
+
       - name: Lightstep Pre-Deploy Check
         id: lightstep-predeploy
         uses: ./.github/actions/lightstep-action-predeploy
@@ -30,8 +40,11 @@ jobs:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
           rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
+
       - name: Echo Status
-        run: echo ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status }}
+        run: |
+          echo ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status }}
+
       - name: Take Lightstep Snapshot
         id: lightstep-snapshot
         if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
@@ -40,7 +53,34 @@ jobs:
           lightstep_organization: ${{ steps.lightstep-predeploy.outputs.lightstep_organization }}
           lightstep_project: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}
           lightstep_service: 'frontend'
-        uses: ./actions/lightstep-snapshot
+        uses: ./.github/actions/lightstep-action-snapshot
+
+      - name: Add PagerDuty Change Event
+        if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
+        run: |
+          NOW=$(node -e 'console.log((new Date()).toISOString())')
+          curl -s --request POST \
+            --url https://events.pagerduty.com/v2/change/enqueue \
+            --header 'content-type: application/json' \
+            --data '{
+              "routing_key": "${{ secrets.PAGERDUTY_ROUTING_KEY }}",
+              "payload": {
+                "summary": "Lightstep Pre-Deploy Check Failed",
+                "source": "lightstep/github-action-predeploy",
+                "timestamp": "'"$NOW"'"
+              },
+              "links": [
+                {
+                  "href": "https://app.staging.lightstep.com/${{ steps.lightstep-predeploy.outputs.lightstep_project }}/explorer?snapshot_id=${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}",
+                  "text": "Lightstep Service Snapshot"
+                },
+                {
+                  "href": "https://github.com/'"$GITHUB_REPOSITORY"'/commit/'"$GITHUB_SHA"'",
+                  "text": "GitHub Commit"
+                }
+              ]
+            }'
+
       - name: Add Comment
         uses: unsplash/comment-on-pr@master
         env:

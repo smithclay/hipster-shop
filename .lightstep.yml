@@ -1,0 +1,10 @@
+organization: -13a29ef7
+project: dev-clay
+
+integrations:
+  rollbar:
+    environment: production
+    account: lightstep
+    project: Lightstep-Hipster-Shop
+  pagerduty:
+    service: PC8O0L3

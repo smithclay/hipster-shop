@@ -7,4 +7,4 @@ integrations:
     account: lightstep
     project: Lightstep-Hipster-Shop
   pagerduty:
-    service: PC8O0L3
+    service: PA0B3RR

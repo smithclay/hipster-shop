@@ -72,7 +72,7 @@ jobs:
               "links": [
                 {
                   "href": "https://app.staging.lightstep.com/${{ steps.lightstep-predeploy.outputs.lightstep_project }}/explorer?snapshot_id=${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}",
-                  "text": "Lightstep Service Snapshot"
+                  "text": "View Lightstep Service Snapshot"
                 },
                 {
                   "href": "https://github.com/'"$GITHUB_REPOSITORY"'/commit/'"$GITHUB_SHA"'",

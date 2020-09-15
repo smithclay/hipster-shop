@@ -52,7 +52,7 @@ jobs:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_organization: ${{ steps.lightstep-predeploy.outputs.lightstep_organization }}
           lightstep_project: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}
-          lightstep_snapshot_query: service in (\"frontend\")
+          lightstep_snapshot_query: 'service IN ("frontend")'
         uses: ./.github/actions/lightstep-action-snapshot
 
       - name: Add PagerDuty Change Event

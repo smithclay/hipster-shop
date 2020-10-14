@@ -1,16 +1,17 @@
-name: Post-Deploy Snapshot
+name: Lightstep Snapshot
 
 on: deployment_status
 
 jobs:
   snapshot:
     runs-on: ubuntu-latest
-    name: Take Snapshot 
+    name: Attach Snapshot to Repository
     if: github.event.deployment_status.state == 'success'
 
     steps:
-      - run: |
-          cat $GITHUB_EVENT_PATH
+      - name: 🛎️ Checkout
+        if: success()
+        uses: actions/checkout@v2
 
       - name: 📸 Take Lightstep Snapshot 
         id: lightstep-snapshot
@@ -19,17 +20,13 @@ jobs:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_organization: LightStep
           lightstep_project: demo
-          lightstep_snapshot_query: '"service.version" IN ("${{ github.event.deployment.ref }}")'
-
-      - name: 🛎️ Checkout 
-        if: success()
-        uses: actions/checkout@v2
+          lightstep_snapshot_query: '"service.version" IN ("${{ github.event.deployment.sha }}")'
 
       - name: 🏷 Create new tag 
         if: success()
         uses: simpleactions/create-tag@v1.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.event.deployment.ref }}
+          sha: ${{ github.event.deployment.sha }}
           tag: lightstep.snapshot.${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}
           message: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}

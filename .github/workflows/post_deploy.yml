@@ -19,7 +19,7 @@ jobs:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_organization: LightStep
           lightstep_project: demo
-          lightstep_snapshot_query: '"service.version" IN ("${{ github.event.deployment.ref }}")'
+          lightstep_snapshot_query: '"service.version" IN ("${{ github.event.deployment.sha }}")'
 
       - name: 🛎️ Checkout 
         if: success()
@@ -30,6 +30,8 @@ jobs:
         uses: simpleactions/create-tag@v1.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.event.deployment.ref }}
+          sha: ${{ github.event.deployment.sha }}
           tag: lightstep.snapshot.${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}
-          message: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}
+          message: |
+            ### 📸 Lightstep Snapshot ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}
+            * [View in Lightstep](https://app.lightstep.com/demo/explorer?snapshot_id=${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }})

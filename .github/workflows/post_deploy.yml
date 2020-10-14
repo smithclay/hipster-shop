@@ -1,33 +1,35 @@
-name: Post-Deploy
+name: Post-Deploy Snapshot
 
 on: deployment_status
 
 jobs:
-  postdeploy:
+  snapshot:
     runs-on: ubuntu-latest
-    name: Take Snapshot
+    name: Take Snapshot 
+    if: github.event.deployment_status.state == 'success'
+
     steps:
       - run: |
-          export
-          echo $GITHUB_EVENT_PATH | jq
+          cat $GITHUB_EVENT_PATH
 
-      - name: Take Lightstep Snapshot
+      - name: 📸 Take Lightstep Snapshot 
         id: lightstep-snapshot
-        if: github.event.deployment_status.state == 'success'
         uses: lightstep/lightstep-action-snapshot@master
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_organization: LightStep
           lightstep_project: demo
-          lightstep_snapshot_query: '"service.version" IN ("${{ github.ref }}")'
+          lightstep_snapshot_query: '"service.version" IN ("${{ github.event.deployment.ref }}")'
 
-      - name: Update deployment status (success)
+      - name: 🛎️ Checkout 
         if: success()
-        uses: chrnorm/deployment-status@releases/v1
+        uses: actions/checkout@v2
+
+      - name: 🏷 Create new tag 
+        if: success()
+        uses: simpleactions/create-tag@v1.0.0
         with:
-          token: ${{ secrets.SMITHCLAY_PAT }}
-          target_url: http://my-app-url.com
-          state: "success"
-          # This is a hack to persist the snapshot id in deployment status
-          description: 'lightstep.snapshot_id.${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}'
-          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.deployment.ref }}
+          tag: lightstep.snapshot.${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}
+          message: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}

@@ -1,5 +1,7 @@
-organization: -13a29ef7
-project: dev-clay
+# configuration file for Lightstep GitHub Action
+
+organization: LightStep
+project: demo
 
 integrations:
   rollbar:
@@ -7,4 +9,4 @@ integrations:
     account: lightstep
     project: Lightstep-Hipster-Shop
   pagerduty:
-    service: PC8O0L3
+    service: PA0B3RR

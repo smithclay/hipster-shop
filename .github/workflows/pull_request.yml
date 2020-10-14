@@ -1,8 +1,7 @@
 name: Lightstep Pre-Deploy Check
 on: 
-  pull_request:
-#   pull_request_review:
-#    types: [submitted]
+   pull_request_review:
+    types: [submitted]
 
 jobs:    
   deploy_check_job:

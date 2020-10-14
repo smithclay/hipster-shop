@@ -4,9 +4,6 @@ on:
 #   pull_request_review:
 #    types: [submitted]
 
-env:
-  LIGHTSTEP_API_HOST: api-staging.lightstep.com
-
 jobs:    
   deploy_check_job:
     runs-on: ubuntu-latest
@@ -16,44 +13,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      # checkout the private repo containing lightstep action
-      - name: Checkout Predeploy GitHub Action Repo
-        uses: actions/checkout@v2
-        with:
-          repository: lightstep/lightstep-action-predeploy
-          ref: master
-          token: ${{ secrets.SMITHCLAY_PAT }}
-          path: .github/actions/lightstep-action-predeploy
-
-      - name: Checkout Snapshot GitHub Action Repo
-        uses: actions/checkout@v2
-        with:
-          repository: lightstep/lightstep-action-snapshot
-          ref: master
-          token: ${{ secrets.SMITHCLAY_PAT }}
-          path: .github/actions/lightstep-action-snapshot
-
       - name: Lightstep Pre-Deploy Check
         id: lightstep-predeploy
-        uses: ./.github/actions/lightstep-action-predeploy
+        uses: lightstep/lightstep-action-predeploy@master
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
           rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
 
-      - name: Echo Status
-        run: |
-          echo ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status }}
-
       - name: Take Lightstep Snapshot
         id: lightstep-snapshot
+        uses: lightstep/lightstep-action-snapshot@master
         if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_organization: ${{ steps.lightstep-predeploy.outputs.lightstep_organization }}
           lightstep_project: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}
           lightstep_snapshot_query: 'service IN ("frontend")'
-        uses: ./.github/actions/lightstep-action-snapshot
 
       - name: Add PagerDuty Change Event
         if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}

@@ -1,7 +1,9 @@
 name: Lightstep Pre-Deploy Check
-on: 
-   pull_request_review:
-    types: [submitted]
+on:
+  pull_request:
+#on: 
+#   pull_request_review:
+#    types: [submitted]
 
 jobs:    
   deploy_check_job:
@@ -14,7 +16,7 @@ jobs:
 
       - name: Lightstep Pre-Deploy Check
         id: lightstep-predeploy
-        uses: lightstep/lightstep-action-predeploy@master
+        uses: lightstep/lightstep-action-predeploy@v0.1.4
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}

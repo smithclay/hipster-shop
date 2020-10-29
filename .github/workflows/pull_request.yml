@@ -22,41 +22,16 @@ jobs:
           pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
           rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
 
-      - name: Take Lightstep Snapshot
+      - name: Compare Snapshots
         id: lightstep-snapshot
-        uses: lightstep/lightstep-action-snapshot@master
+        uses: lightstep/lightstep-action-snapshot@v2
         if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_organization: ${{ steps.lightstep-predeploy.outputs.lightstep_organization }}
           lightstep_project: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}
-          lightstep_snapshot_query: 'service IN ("frontend")'
-
-      - name: Add PagerDuty Change Event
-        if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
-        run: |
-          NOW=$(node -e 'console.log((new Date()).toISOString())')
-          curl -s --request POST \
-            --url https://events.pagerduty.com/v2/change/enqueue \
-            --header 'content-type: application/json' \
-            --data '{
-              "routing_key": "${{ secrets.PAGERDUTY_ROUTING_KEY }}",
-              "payload": {
-                "summary": "Lightstep Pre-Deploy Check Failed",
-                "source": "lightstep/github-action-predeploy",
-                "timestamp": "'"$NOW"'"
-              },
-              "links": [
-                {
-                  "href": "https://app.staging.lightstep.com/${{ steps.lightstep-predeploy.outputs.lightstep_project }}/explorer?snapshot_id=${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}",
-                  "text": "View Lightstep Service Snapshot"
-                },
-                {
-                  "href": "https://github.com/'"$GITHUB_REPOSITORY"'/commit/'"$GITHUB_SHA"'",
-                  "text": "GitHub Commit"
-                }
-              ]
-            }'
+          lightstep_snapshot_before: 'MlbrYE7aU9'
+          lightstep_snapshot_after: '4YJ5pIagGU'
 
       - name: Add Comment
         uses: unsplash/comment-on-pr@master
@@ -64,4 +39,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           msg: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_md }}
+          check_for_duplicate_msg: true
+
+      - name: Add Snapshot Diff Comment
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_diff_md }}
           check_for_duplicate_msg: true

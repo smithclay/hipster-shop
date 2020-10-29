@@ -1,6 +1,6 @@
 name: Deploy
 
-on: [push]
+on: [workflow_dispatch]
 
 # Mock deployment action that creates GitHub deploy events
 # (no-op)

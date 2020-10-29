@@ -1,6 +1,6 @@
 name: Lightstep Snapshot
 
-on: deployment_status
+on: workflow_dispatch
 
 jobs:
   snapshot:

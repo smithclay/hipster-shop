@@ -22,10 +22,15 @@ jobs:
           pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
           rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
 
+      # TODO: Diff files + get services
+      # https://github.com/trilom/file-changes-action
+
       - name: Compare Snapshots
         id: lightstep-snapshot
         uses: lightstep/lightstep-action-snapshot@v2
         if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
+        env:
+          LS_ACCESS_TOKEN: ${{ secrets.LS_ACCESS_TOKEN }}
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_organization: ${{ steps.lightstep-predeploy.outputs.lightstep_organization }}

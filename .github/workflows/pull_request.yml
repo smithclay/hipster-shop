@@ -24,6 +24,12 @@ jobs:
 
       # TODO: Diff files + get services
       # https://github.com/trilom/file-changes-action
+      - name: Cache Snapshots
+        id: cache-snapshots
+        uses: actions/cache@v2
+        with:
+          path: /tmp/lightstep
+          key: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}-snapshots
 
       - name: Compare Snapshots
         id: lightstep-snapshot

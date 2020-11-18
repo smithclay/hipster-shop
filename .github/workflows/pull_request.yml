@@ -41,8 +41,8 @@ jobs:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_organization: ${{ steps.lightstep-predeploy.outputs.lightstep_organization }}
           lightstep_project: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}
-          lightstep_snapshot_before: 'MlbrYE7aU9'
-          lightstep_snapshot_after: '4YJ5pIagGU'
+          lightstep_snapshot_before: 'MlbrYE7aU9' # support -1
+          lightstep_snapshot_after: '4YJ5pIagGU' # support -2
 
       - name: Add Comment
         uses: unsplash/comment-on-pr@master

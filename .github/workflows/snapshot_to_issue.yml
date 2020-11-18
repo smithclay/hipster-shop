@@ -5,7 +5,7 @@ on:
     types: [created, deleted]
 
 jobs:
-  take_snapshot:
+  add_snapshot_to_issue:
     runs-on: ubuntu-latest
     name: Take Snapshot
     steps:

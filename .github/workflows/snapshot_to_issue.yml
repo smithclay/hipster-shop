@@ -1,4 +1,4 @@
-name: Performance Analyzer
+name: Attach Snapshot to Issue
 
 on:
   label:

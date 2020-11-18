@@ -29,7 +29,7 @@ jobs:
         run: sleep 240
 
       - name: Get Snapshot Summary
-        id: lightstep-snapshot
+        id: lightstep-snapshot-summary
         uses: lightstep/lightstep-action-snapshot@v2
         if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
         # Pass LS_ACCESS_TOKEN if you want to see traces of the action (cool!)
@@ -43,4 +43,4 @@ jobs:
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ github.event.issue_number }}
-          body: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_diff_md }}
+          body: ${{ steps.lightstep-lightstep-snapshot-summary.outputs.lightstep_snapshot_diff_md }}

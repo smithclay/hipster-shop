@@ -1,7 +1,49 @@
 # configuration file for Lightstep GitHub Action
 
 organization: LightStep
-project: demo
+project: Robin-Hipster-Shop
+
+services:
+  adservice:
+    path: ./src/adservice
+    integrations:
+      pagerduty:
+        service: PXTW6XZ
+  cartservice:
+    path: ./src/cartservice
+  checkoutservice:
+    path: ./src/checkoutservice
+  currencyservice:
+    path: ./src/currencyservice
+  emailservice:
+    path: ./src/emailservice
+  frontend:
+    path: ./src/frontend
+    violations:
+      - name: No requests to currency service
+        type: connection
+        value: currencyservice
+      - name: No 500s Allowed
+        type: span.attributes
+        key: http.status_code
+        op: equals
+        value: 500
+      - name: No us-east-2
+        type: span.attributes
+        key: cloud.region
+        op: equals
+        value: us-east-2
+    integrations:
+      pagerduty:
+        service: PXTW6XZ
+  loadgenerator:
+    path: ./src/loadgenerator
+  paymentservice:
+    path: ./src/paymentservice
+  productcatalogservice:
+    path: ./src/productcatalogservice
+  shippingservice:
+    path: ./src/shippingservice
 
 integrations:
   rollbar:

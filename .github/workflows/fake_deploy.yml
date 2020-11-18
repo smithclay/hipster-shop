@@ -1,0 +1,45 @@
+name: Deploy
+
+on: [workflow_dispatch]
+
+# Mock deployment action that creates GitHub deploy events
+# (no-op)
+
+jobs:
+  deploy:
+    name: Deploy my app
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: chrnorm/deployment-action@releases/v1
+        name: Create GitHub deployment
+        id: deployment
+        with:
+          token: ${{ secrets.SMITHCLAY_PAT }}
+          target_url: http://my-app-url.com
+          environment: production
+          ref: ${{ github.ref }}
+
+      - name: Deploy my app
+        run: |
+          sleep 10
+          echo This is a fake deploy process.
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: ${{ secrets.SMITHCLAY_PAT }}
+          target_url: http://my-app-url.com
+          state: "success"
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: ${{ secrets.SMITHCLAY_PAT }}
+          target_url: http://my-app-url.com
+          state: "failure"
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}

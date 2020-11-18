@@ -1,0 +1,46 @@
+name: Performance Analyzer
+
+on:
+  label:
+    types: [created, deleted]
+
+jobs:
+  take_snapshot:
+    runs-on: ubuntu-latest
+    name: Take Snapshot
+    steps:
+      - run: cat $GITHUB_EVENT_PATH | jq
+      # Needed if reading configuration from `.lightstep.yml`
+      - name: 🛎️ Checkout
+        if: success()
+        uses: actions/checkout@v2
+
+      - name: 📸 Take Lightstep Snapshot
+        id: lightstep-snapshot
+        uses: lightstep/lightstep-action-snapshot@v2
+        with:
+          lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
+          lightstep_organization: LightStep
+          lightstep_project: demo
+          lightstep_snapshot_query: '"github.sha" IN ("${{ github.sha }}")'
+      
+      # Wait ~4 minutes for the snapshot to complete
+      - name: Wait for Snapshot to Complete
+        run: sleep 240
+
+      - name: Get Snapshot Summary
+        id: lightstep-snapshot
+        uses: lightstep/lightstep-action-snapshot@v2
+        if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
+        # Pass LS_ACCESS_TOKEN if you want to see traces of the action (cool!)
+        env:
+          LS_ACCESS_TOKEN: ${{ secrets.LS_ACCESS_TOKEN }}
+        with:
+          lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
+          lightstep_snapshot_id: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_id }}
+
+      - name: Add Snapshot Summary to Issue
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.issue_number }}
+          body: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_diff_md }}

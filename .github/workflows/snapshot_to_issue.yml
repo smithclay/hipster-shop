@@ -1,15 +1,16 @@
 name: Attach Snapshot to Issue
 
 on:
+  workflow_dispatch:
   label:
-    types: [created, deleted]
+    types: [created, deleted, edited]
 
 jobs:
   add_snapshot_to_issue:
     runs-on: ubuntu-latest
     name: Take Snapshot
     steps:
-      - run: cat $GITHUB_EVENT_PATH | jq
+      - run: export
       # Needed if reading configuration from `.lightstep.yml`
       - name: 🛎️ Checkout
         if: success()

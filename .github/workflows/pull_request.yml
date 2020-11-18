@@ -43,6 +43,8 @@ jobs:
           lightstep_project: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}
           lightstep_snapshot_before: 'MlbrYE7aU9' # support -1
           lightstep_snapshot_after: '4YJ5pIagGU' # support -2
+          pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
+          rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
 
       - name: Add Comment
         uses: unsplash/comment-on-pr@master

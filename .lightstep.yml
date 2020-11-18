@@ -1,7 +1,7 @@
 # configuration file for Lightstep GitHub Action
 
 organization: LightStep
-project: Robin-Hipster-Shop
+project: demo
 
 services:
   adservice:

@@ -2,15 +2,21 @@ name: Attach Snapshot to Issue
 
 on:
   workflow_dispatch:
-  label:
-    types: [created, deleted, edited]
+  issues:
+    types: [labeled]
 
 jobs:
   add_snapshot_to_issue:
     runs-on: ubuntu-latest
     name: Take Snapshot
+    if: contains(github.event.issue.labels.*.name, 'bug')
+
     steps:
-      - run: export
+      - run: |
+          export
+          echo $GITHUB_EVENT_PATH
+          cat $GITHUB_EVENT_PATH
+
       # Needed if reading configuration from `.lightstep.yml`
       - name: 🛎️ Checkout
         if: success()
@@ -23,8 +29,13 @@ jobs:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_organization: LightStep
           lightstep_project: demo
-          lightstep_snapshot_query: '"github.sha" IN ("${{ github.sha }}")'
-      
+          pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
+          rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
+          # query that always returns data in the test env
+          lightstep_snapshot_query: '"service.version" NOT IN ("baz")'
+#         Recommended query based on SHA:
+#         lightstep_snapshot_query: '"github.sha" IN ("${{ github.sha }}")'
+     
       # Wait ~4 minutes for the snapshot to complete
       - name: Wait for Snapshot to Complete
         run: sleep 240
@@ -43,5 +54,5 @@ jobs:
       - name: Add Snapshot Summary to Issue
         uses: peter-evans/create-or-update-comment@v1
         with:
-          issue-number: ${{ github.event.issue_number }}
-          body: ${{ steps.lightstep-lightstep-snapshot-summary.outputs.lightstep_snapshot_diff_md }}
+          issue-number: ${{ github.event.issue.number }}
+          body: ${{ steps.lightstep-snapshot-summary.outputs.lightstep_snapshot_diff_md }}

@@ -1,12 +1,13 @@
 name: Lightstep Pre-Deploy Check
 on:
+  workflow_dispatch:
   pull_request:
 #on: 
 #   pull_request_review:
 #    types: [submitted]
 
 jobs:    
-  deploy_check_job:
+  predeploy_check_job:
     runs-on: ubuntu-latest
     name: Verify Pre-Deploy Status
 
@@ -22,8 +23,6 @@ jobs:
           pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
           rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
 
-      # TODO: Diff files + get services
-      # https://github.com/trilom/file-changes-action
       - name: Cache Snapshots
         id: cache-snapshots
         uses: actions/cache@v2
@@ -35,14 +34,10 @@ jobs:
         id: lightstep-snapshot
         uses: lightstep/lightstep-action-snapshot@v2
         if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
-        env:
-          LS_ACCESS_TOKEN: ${{ secrets.LS_ACCESS_TOKEN }}
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
-          lightstep_organization: ${{ steps.lightstep-predeploy.outputs.lightstep_organization }}
-          lightstep_project: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}
-          lightstep_snapshot_before: 'MlbrYE7aU9' # support -1
-          lightstep_snapshot_after: '4YJ5pIagGU' # support -2
+          lightstep_snapshot_compare_id: 'MlbrYE7aU9'
+          lightstep_snapshot_id: '4YJ5pIagGU'
           pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
           rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
 
@@ -59,5 +54,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          msg: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_diff_md }}
+          msg: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_md }}
           check_for_duplicate_msg: true

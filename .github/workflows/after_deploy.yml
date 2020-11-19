@@ -1,0 +1,51 @@
+name: Lightstep Post-Deploy Check
+on:
+  workflow_dispatch:
+  deployment_status:
+
+jobs:    
+  postdeploy_check_job:
+    runs-on: ubuntu-latest
+    name: Compare Snapshots
+
+    steps:  
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: 📸 Take Lightstep Snapshot
+        id: lightstep-take-snapshot
+        uses: lightstep/lightstep-action-snapshot@v2
+        with:
+          lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
+          # Query for the snapshot
+          # Recommended to use a query based on SHA:
+          # lightstep_snapshot_query: '"github.sha" IN ("${{ github.sha }}")'
+          lightstep_snapshot_query: '"service.version" NOT IN ("baz")'
+
+      - name: Wait for Snapshot to Complete
+        run: sleep 240
+
+      - name: Cache Snapshots
+        id: cache-snapshots
+        uses: actions/cache@v2
+        with:
+          path: /tmp/lightstep
+          key: ${{ steps.lightstep-take-snapshot.outputs.lightstep_project }}-snapshots
+
+      - name: Compare Snapshots
+        id: lightstep-snapshot
+        uses: lightstep/lightstep-action-snapshot@v2
+        with:
+          lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
+          lightstep_snapshot_compare_id: '*'
+          lightstep_snapshot_id: ${{ steps.lightstep-take-snapshot.outputs.lightstep_snapshot_id }}
+          pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
+          rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
+
+      - name: Add Snapshot Comment
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_md }}
+          check_for_duplicate_msg: true

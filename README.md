@@ -16,7 +16,6 @@ This is a [Lightstep](https://lightstep.com) fork of https://github.com/GoogleCl
 - [Cleanup](#cleanup)
 - [Conferences featuring Hipster Shop](#conferences-featuring-hipster-shop)
 
-
 The application is a web-based e-commerce app called **Hipster Shop** where users can browse items,
 add them to the cart, and purchase them.  Google uses this application to demonstrate use of technologies like
 Kubernetes/GKE, Istio, Stackdriver, gRPC and OpenCensus.

@@ -6,7 +6,7 @@ on:
 #   pull_request_review:
 #    types: [submitted]
 
-jobs:    
+jobs:
   predeploy_check_job:
     runs-on: ubuntu-latest
     name: Verify Pre-Deploy Status
@@ -17,18 +17,11 @@ jobs:
 
       - name: Lightstep Pre-Deploy Check
         id: lightstep-predeploy
-        uses: lightstep/lightstep-action-predeploy@v0.2.0
+        uses: lightstep/lightstep-action-predeploy@master
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
           rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
-
-      - name: Cache Snapshots
-        id: cache-snapshots
-        uses: actions/cache@v2
-        with:
-          path: /tmp/lightstep
-          key: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}-snapshots
 
       - name: Add Comment
         uses: unsplash/comment-on-pr@master

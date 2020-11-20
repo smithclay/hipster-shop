@@ -17,7 +17,7 @@ jobs:
 
       - name: Lightstep Pre-Deploy Check
         id: lightstep-predeploy
-        uses: lightstep/lightstep-action-predeploy@v0.1.4
+        uses: lightstep/lightstep-action-predeploy@v0.2.0
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
@@ -36,12 +36,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           msg: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_md }}
-          check_for_duplicate_msg: true
-
-      - name: Add Snapshot Diff Comment
-        uses: unsplash/comment-on-pr@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          msg: ${{ steps.lightstep-snapshot.outputs.lightstep_snapshot_md }}
           check_for_duplicate_msg: true

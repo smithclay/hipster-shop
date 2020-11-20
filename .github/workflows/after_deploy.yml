@@ -1,13 +1,13 @@
 name: Lightstep Post-Deploy Check
 on:
   workflow_dispatch:
-  deployment_status:
+#  deployment_status:
 
 jobs:    
   postdeploy_check_job:
     runs-on: ubuntu-latest
     name: Compare Snapshots
-    if: github.event.deployment_status.state == 'success'
+    #if: github.event.deployment_status.state == 'success'
     steps:  
       - name: Checkout
         uses: actions/checkout@v2

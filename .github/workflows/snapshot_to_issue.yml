@@ -53,4 +53,6 @@ jobs:
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_snapshot_id: ${{ steps.take-lightstep-snapshot.outputs.lightstep_snapshot_id }}
+          lightstep_service_filter: web,iOS,android,inventory
+
 

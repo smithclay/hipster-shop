@@ -7,12 +7,12 @@ services:
   android:
     integrations:
       pagerduty:
-        service: PXTW6XZ
+        service: PAJ0Y4V
   iOS:
     path: ./src/cartservice
     integrations:
       pagerduty:
-        service: PXTW6XZ
+        service: PC8O0L3
   profile:
   krackend-api-gateway:
   inventory:
@@ -33,7 +33,7 @@ services:
         value: us-east-2
     integrations:
       pagerduty:
-        service: PXTW6XZ
+        service: PC8O0L3
 
 conditions:
   - 9k8QvPSw

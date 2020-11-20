@@ -21,6 +21,7 @@ The application is a web-based e-commerce app called **Hipster Shop** where user
 add them to the cart, and purchase them.  Google uses this application to demonstrate use of technologies like
 Kubernetes/GKE, Istio, Stackdriver, gRPC and OpenCensus.
 
+
 This fork of the repository demonstrate how to instrument for distributed tracing and monitoring using multiple tracing libraries, including OpenTelemetry, OpenTracing, and tracers from LightStep, Zipkin, and Jaeger.
 Use the app to learn and experiment with distributed system telemetry and then run [LightStep](https://app.lightstep.com) to see your telemetry data in action.
 

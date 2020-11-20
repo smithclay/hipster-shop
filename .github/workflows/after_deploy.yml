@@ -1,36 +1,35 @@
 name: Lightstep Post-Deploy Check
 on:
-  workflow_dispatch:
-#  deployment_status:
+  deployment_status:
 
 jobs:    
   postdeploy_check_job:
     runs-on: ubuntu-latest
     name: Compare Snapshots
-    #if: github.event.deployment_status.state == 'success'
+    if: github.event.deployment_status.state == 'success'
     steps:  
       - name: Checkout
         uses: actions/checkout@v2
 
-      # - name: 📸 Take Lightstep Snapshot
-      #   id: lightstep-take-snapshot
-      #   uses: lightstep/lightstep-action-snapshot@v2
-      #   with:
-      #     lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
-      #     # Query for the snapshot
-      #     # Recommended to use a query based on SHA:
-      #     # lightstep_snapshot_query: '"github.sha" IN ("${{ github.sha }}")'
-      #     lightstep_snapshot_query: '"service.version" NOT IN ("baz")'
+      - name: 📸 Take Lightstep Snapshot
+        id: lightstep-take-snapshot
+        uses: lightstep/lightstep-action-snapshot@v2
+        with:
+          lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
+          # Query for the snapshot
+          # Recommended to use a query based on SHA:
+          # lightstep_snapshot_query: '"github.sha" IN ("${{ github.sha }}")'
+          lightstep_snapshot_query: '"service.version" NOT IN ("baz")'
 
-      # - name: Wait for Snapshot to Complete
-      #   run: sleep 240
+      - name: Wait for Snapshot to Complete
+        run: sleep 240
 
-      # - name: Cache Snapshots
-      #   id: cache-snapshots
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: /tmp/lightstep
-      #     key: ${{ steps.lightstep-take-snapshot.outputs.lightstep_project }}-snapshots
+      - name: Cache Snapshots
+        id: cache-snapshots
+        uses: actions/cache@v2
+        with:
+          path: /tmp/lightstep
+          key: ${{ steps.lightstep-take-snapshot.outputs.lightstep_project }}-snapshots
 
       - name: Compare Snapshots
         id: lightstep-snapshot

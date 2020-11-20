@@ -37,6 +37,8 @@ services:
 
 conditions:
   - 9k8QvPSw
+  - XvKgrQyj
+  - tC5CTBWt
 
 integrations:
   rollbar:

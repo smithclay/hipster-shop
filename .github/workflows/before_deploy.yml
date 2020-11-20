@@ -30,17 +30,6 @@ jobs:
           path: /tmp/lightstep
           key: ${{ steps.lightstep-predeploy.outputs.lightstep_project }}-snapshots
 
-      - name: Compare Snapshots
-        id: lightstep-snapshot
-        uses: lightstep/lightstep-action-snapshot@v2
-        if: ${{ steps.lightstep-predeploy.outputs.lightstep_predeploy_status != 'ok' }}
-        with:
-          lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
-          lightstep_snapshot_compare_id: 'MlbrYE7aU9'
-          lightstep_snapshot_id: '4YJ5pIagGU'
-          pagerduty_api_token: ${{ secrets.PAGERDUTY_API_TOKEN }}
-          rollbar_api_token: ${{ secrets.ROLLBAR_API_TOKEN }}
-
       - name: Add Comment
         uses: unsplash/comment-on-pr@master
         env:

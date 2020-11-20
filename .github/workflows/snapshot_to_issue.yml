@@ -13,15 +13,9 @@ jobs:
     if: contains(github.event.issue.labels.*.name, 'bug')
 
     steps:
-      - run: |
-          export
-          echo $GITHUB_EVENT_PATH
-          cat $GITHUB_EVENT_PATH
-
       # Check out the repo to read configuration 
       # from the `.lightstep.yml` file in the repo root directory.
       - name: 🛎️ Checkout
-        if: success()
         uses: actions/checkout@v2
 
       - name: 📸 Take Lightstep Snapshot
@@ -33,8 +27,7 @@ jobs:
           PAGERDUTY_API_TOKEN: ${{ secrets.PAGERDUTY_API_TOKEN }}
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
-          #
-          # Infer a recent snapshot to compare with using the API
+          # Infer a recent snapshot to compare with using the API:
           # '*' uses most recent available (per project or repo tag if exists)
           lightstep_snapshot_compare_id: '*'
           # Query for the snapshot
@@ -52,15 +45,12 @@ jobs:
           path: /tmp/lightstep
           key: ${{ steps.take-lightstep-project.outputs.lightstep_project }}-snapshots
 
-      - name: Get Snapshot Summary
+      - name: Snapshot Summary
         id: lightstep-snapshot-summary
         uses: lightstep/lightstep-action-snapshot@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_snapshot_id: ${{ steps.take-lightstep-snapshot.outputs.lightstep_snapshot_id }}
 
-      - name: Add Snapshot Summary to Issue
-        uses: peter-evans/create-or-update-comment@v1
-        with:
-          issue-number: ${{ github.event.issue.number }}
-          body: ${{ steps.lightstep-snapshot-summary.outputs.lightstep_snapshot_md }}

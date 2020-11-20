@@ -42,7 +42,10 @@ jobs:
           lightstep_api_key: ${{ secrets.LIGHTSTEP_API_TOKEN }}
           lightstep_snapshot_compare_id: '*'
           lightstep_snapshot_id: 'HwWzmT9GKb'
+          lightstep_service_filter: web,iOS,android,inventory
           # lightstep_snapshot_id: ${{ steps.lightstep-take-snapshot.outputs.lightstep_snapshot_id }}
+
+# https://developer.github.com/v3/repos/commits/#list-pull-requests-associated-with-a-commit
 
       - name: 'Comment PR'
         uses: actions/github-script@v3
@@ -51,8 +54,15 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const pulls = await github.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: process.env.GITHUB_SHA,
+            });
+            console.log(pulls)
+            const num = pulls[0].number
             await github.issues.createComment({ 
-              issue_number: 19,
+              issue_number: num,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: process.env.SNAPSHOT_SUMMARY 
